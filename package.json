@@ -1,0 +1,25 @@
+{
+  "name": "lmstudio-model-switch",
+  "version": "1.0.0",
+  "description": "Fast model switching between LM Studio local and Kimi API for OpenClaw",
+  "main": "index.js",
+  "author": "WarMech",
+  "license": "MIT",
+  "openclaw": {
+    "minVersion": "2026.3.12",
+    "commands": [
+      {
+        "name": "switch-model",
+        "description": "Switch between local and API models",
+        "args": ["action", "model"]
+      }
+    ]
+  },
+  "keywords": [
+    "lmstudio",
+    "kimi",
+    "model-switching",
+    "local-llm",
+    "api"
+  ]
+}
