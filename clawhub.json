@@ -1,0 +1,37 @@
+{
+  "name": "lmstudio-model-switch",
+  "version": "1.0.0",
+  "description": "Fast model switching between LM Studio local and Kimi API for OpenClaw",
+  "author": "Endihunn",
+  "license": "MIT",
+  "repository": "https://github.com/Endihunn/lmstudio-model-switch",
+  "homepage": "https://github.com/Endihunn/lmstudio-model-switch#readme",
+  "bugs": "https://github.com/Endihunn/lmstudio-model-switch/issues",
+  "keywords": [
+    "lmstudio",
+    "kimi",
+    "model-switching",
+    "local-llm",
+    "api",
+    "productivity"
+  ],
+  "categories": [
+    "tools",
+    "productivity"
+  ],
+  "openclaw": {
+    "minVersion": "2026.3.12",
+    "maxVersion": null,
+    "commands": [
+      {
+        "name": "switch-model",
+        "description": "Switch between local LM Studio and Kimi API models"
+      }
+    ]
+  },
+  "screenshots": [
+    "https://raw.githubusercontent.com/Endihunn/lmstudio-model-switch/main/docs/screenshot-status.png",
+    "https://raw.githubusercontent.com/Endihunn/lmstudio-model-switch/main/docs/screenshot-switch.png"
+  ],
+  "icon": "https://raw.githubusercontent.com/Endihunn/lmstudio-model-switch/main/docs/icon.png"
+}
