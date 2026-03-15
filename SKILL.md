@@ -1,20 +1,16 @@
 # lmstudio-model-switch
 
-**Fast model switching between LM Studio local and Kimi API for OpenClaw.**
+**Fast model switching between LM Studio local, Kimi API, and Anthropic Claude for OpenClaw.**
 
-Switch your agent's AI model on-the-fly between local (LM Studio) and cloud (Kimi API) providers with a single command.
+Switch your agent's AI model on-the-fly with a single command — no manual config edits required.
 
 ---
 
 ## Installation
 
 ```bash
-# Clone to your OpenClaw skills directory
-git clone https://github.com/yourusername/lmstudio-model-switch \
+git clone https://github.com/Endihunn/lmstudio-model-switch \
   ~/.openclaw/workspace/skills/lmstudio-model-switch
-
-# Or manually copy
-cp -r lmstudio-model-switch ~/.openclaw/workspace/skills/
 ```
 
 ---
@@ -26,47 +22,96 @@ cp -r lmstudio-model-switch ~/.openclaw/workspace/skills/
 | Command | Description |
 |---------|-------------|
 | `/switch-model status` | Show current model and available providers |
-| `/switch-model local` | Switch to LM Studio (Qwen 3.5 9B default) |
+| `/switch-model local` | Switch to LM Studio (default model) |
 | `/switch-model local <model>` | Switch to specific local model |
 | `/switch-model api` | Switch to Kimi K2.5 API |
 | `/switch-model kimi` | Alias for `/switch-model api` |
+| `/switch-model claude` | Switch to Anthropic Claude (default) |
+| `/switch-model anthropic` | Alias for `/switch-model claude` |
+| `/switch-model claude <model>` | Switch to specific Claude variant |
 
 ### Examples
 
 ```bash
-# Check current status
+# Check current model
 /switch-model status
 
-# Switch to local LM Studio
+# Switch to local LM Studio (uses DEFAULT_LOCAL_MODEL)
 /switch-model local
 
-# Switch to specific model
-/switch-model local mistral-small-24b
+# Switch to a specific local model
+/switch-model local mistral/mistral-small-3.1
 
-# Switch to Kimi API
-/switch-model api
+# Switch to Kimi K2.5 API
+/switch-model kimi
+
+# Switch to Anthropic Claude Sonnet (default)
+/switch-model claude
+
+# Switch to a specific Claude variant
+/switch-model claude anthropic/claude-haiku-3-5
 ```
 
 ---
 
-## Configuration
+## Model Reference
 
-Add to your `openclaw.json`:
+> **Adjust these constants at the top of `index.js`** to match your setup.
+> They are clearly labeled so any agent or user can find and edit them quickly.
+
+### 🖥️ Local — LM Studio (`DEFAULT_LOCAL_MODEL`)
+
+Format: `"<author>/<model-id>"` — must match exactly as shown in LM Studio.
+
+| Value | Description |
+|-------|-------------|
+| `qwen/qwen3.5-9b` | **Default** — Qwen 3.5 9B Q4_K_M (~6GB VRAM) |
+| `mistral/mistral-small-3.1` | Mistral Small 3.1 24B (~14GB VRAM) |
+| `google/gemma-3-12b` | Gemma 3 12B |
+
+### 🌙 API — Kimi (`KIMI_MODEL`)
+
+| Value | Description |
+|-------|-------------|
+| `kimi-coding/k2p5` | **Default** — Kimi K2.5, coding-optimized |
+
+### 🤖 API — Anthropic Claude (`CLAUDE_MODEL`)
+
+| Value | Description |
+|-------|-------------|
+| `anthropic/claude-sonnet-4-6` | **Default** — Sonnet 4.6, balanced speed/quality |
+| `anthropic/claude-opus-4-5` | Opus 4.5, maximum quality (slower, higher cost) |
+| `anthropic/claude-haiku-3-5` | Haiku 3.5, fastest and cheapest |
+
+> ℹ️ Claude model aliases are set in OpenClaw's model providers config.
+> Verify current aliases with `/status` or check `~/.openclaw/openclaw.json`.
+
+---
+
+## Configuration (openclaw.json)
 
 ```json
 {
   "skills": {
     "lmstudio-model-switch": {
-      "enabled": true,
-      "config": {
-        "local": {
-          "baseUrl": "http://127.0.0.1:1234/v1",
-          "defaultModel": "qwen/qwen3.5-9b"
-        },
-        "api": {
-          "provider": "kimi-coding",
-          "model": "k2p5"
-        }
+      "enabled": true
+    }
+  }
+}
+```
+
+For Anthropic Claude to appear in `/switch-model status`, add your API key to the providers section:
+
+```json
+{
+  "models": {
+    "providers": {
+      "anthropic": {
+        "apiKey": "sk-ant-...",
+        "models": [
+          { "id": "claude-sonnet-4-6", "name": "Claude Sonnet 4.6" },
+          { "id": "claude-haiku-3-5",  "name": "Claude Haiku 3.5" }
+        ]
       }
     }
   }
@@ -77,44 +122,41 @@ Add to your `openclaw.json`:
 
 ## How It Works
 
-1. **Backup**: Creates timestamped backup of `openclaw.json`
-2. **Edit**: Modifies `"primary"` model in agents.defaults
-3. **Verify**: Validates JSON syntax
-4. **Restart**: Restarts OpenClaw gateway service
-5. **Confirm**: Reports new active model
+1. **Backup** — Creates timestamped backup of `openclaw.json`
+2. **Edit** — Modifies `agents.defaults.model.primary`
+3. **Restart** — Restarts `openclaw-gateway.service` via systemd
+4. **Confirm** — Reports old → new model
 
 ---
 
-## Use Cases
+## When to Use Each Provider
 
-### Privacy-First Work
-Use **local** when handling:
-- Authentication tokens
-- Passwords or credentials
-- Sensitive personal data
-- Proprietary code
+### Local (LM Studio) — Privacy-first
+- Authentication tokens, passwords, credentials
+- Proprietary or sensitive code
+- Offline capability required
+- Low-latency needs (no API round-trip)
 
-### Quality-First Work
-Use **API** when needing:
-- Maximum reasoning capability
+### Kimi K2.5 API — Coding & reasoning
+- Complex code generation
 - Very long contexts (>100k tokens)
-- Best-in-class performance
-- Cloud reliability
+- When VRAM is scarce (<6GB free)
 
-### VRAM Management
-Switch to **API** when:
-- GPU memory is low (<6GB free)
-- Running other GPU-intensive tasks
-- LM Studio is restarting
+### Anthropic Claude — Quality & versatility
+- Natural language tasks requiring nuance
+- Document analysis, writing, summarization
+- Best-in-class instruction following
+- When testing API integrations with Anthropic
 
 ---
 
 ## Requirements
 
 - OpenClaw ≥ 2026.3.12
-- LM Studio running on port 1234 (for local mode)
-- Kimi API key configured (for API mode)
-- systemd (for service restart)
+- LM Studio on port 1234 (for `local` mode)
+- Kimi API key configured (for `kimi` mode)
+- Anthropic API key configured (for `claude` mode)
+- systemd user services
 
 ---
 
@@ -122,31 +164,32 @@ Switch to **API** when:
 
 ### "LM Studio not responding"
 ```bash
-# Check if LM Studio is running
 curl http://127.0.0.1:1234/api/v0/models
-
-# Restart LM Studio if needed
-killall lmstudio; sleep 2; lmstudio &
 ```
 
-### "Switch failed"
-- Check JSON syntax: `python3 -m json.tool ~/.openclaw/openclaw.json`
-- Restore from backup: `cp ~/.openclaw/openclaw.json.bak.* ~/.openclaw/openclaw.json`
+### "Switch failed — invalid JSON"
+```bash
+python3 -m json.tool ~/.openclaw/openclaw.json
+# Restore backup:
+ls ~/.openclaw/openclaw.json.bak.*
+cp ~/.openclaw/openclaw.json.bak.<timestamp> ~/.openclaw/openclaw.json
+```
 
 ### "Gateway won't restart"
 ```bash
-# Check service status
 systemctl --user status openclaw-gateway
-
-# Manual restart
 systemctl --user restart openclaw-gateway
 ```
+
+### "Claude model not recognized"
+Verify the model alias exists in your `openclaw.json` providers or that your OpenClaw version supports Anthropic.
+Check: `openclaw status` → Models section.
 
 ---
 
 ## Author
 
-**WarMech** - OpenClaw Community
+**WarMech / Endihunn** — OpenClaw Community
 
 ## License
 
@@ -156,8 +199,11 @@ MIT
 
 ## Changelog
 
-**2026-03-14** - v1.0.0
-- Initial release
-- Support for local/API switching
-- Backup/restore functionality
-- systemd integration
+**2026-03-14** — v1.1.0
+- ✨ Added Anthropic Claude support (`/switch-model claude`)
+- 📝 Centralized model constants at top of `index.js` for easy adjustment
+- 📖 Added Model Reference table (local, kimi, claude variants)
+- 🐛 `status` now shows configured skill defaults alongside available providers
+
+**2026-03-14** — v1.0.0
+- Initial release: local/API switching, backup, systemd restart

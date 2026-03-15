@@ -1,7 +1,7 @@
 {
   "name": "lmstudio-model-switch",
-  "version": "1.0.0",
-  "description": "Fast model switching between LM Studio local and Kimi API for OpenClaw",
+  "version": "1.1.0",
+  "description": "Fast model switching between LM Studio local, Kimi API, and Anthropic Claude for OpenClaw",
   "author": "Endihunn",
   "license": "MIT",
   "repository": "https://github.com/Endihunn/lmstudio-model-switch",
@@ -10,6 +10,8 @@
   "keywords": [
     "lmstudio",
     "kimi",
+    "anthropic",
+    "claude",
     "model-switching",
     "local-llm",
     "api",
@@ -25,7 +27,7 @@
     "commands": [
       {
         "name": "switch-model",
-        "description": "Switch between local LM Studio and Kimi API models"
+        "description": "Switch between local LM Studio, Kimi API, and Anthropic Claude models"
       }
     ]
   },
